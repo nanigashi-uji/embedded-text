@@ -10,7 +10,7 @@ class EmbeddedText(object):
     EmbeddedText: Utility to extract text contents embedded in file
     """
 
-    VERSION     = "0.0.2"
+    VERSION     = "0.0.3"
     HEADSPACE   = re.compile(r'^(?P<indent>\s*).*')
     EMPTYLINE   = re.compile(r'^\s*$')
     TRIPLEQUATE = re.compile(r"^\s*(?P<triplequote>'{3}|\"{3})(?P<rest>.*)$")
@@ -365,9 +365,10 @@ class EmbeddedText(object):
 
         argprsr.add_argument('-c', '--code-extraction-mode', action='store_true', dest='code_mode', default=False, help='Code extraction mode')
         argprsr.add_argument('-t', '--text-extraction-mode', action='store_false',dest='code_mode', default=False, help='Text extraction mode (default)')
-
-        argprsr.add_argument('-s', '--start-pattern',  help='Start marker pattern (Regular Expression)')
-        argprsr.add_argument('-e', '--end-pattern',    help='Start marker pattern (Regular Expression)')
+        argprsr.add_argument('-s', '--start-pattern',      nargs='?', default='', const=None, help='Start marker pattern (Regular Expression)')
+        argprsr.add_argument('-S', '--null-start-pattern', nargs='?', default='', const=None, help='Start marker pattern (Regular Expression)')
+        argprsr.add_argument('-e', '--end-pattern',        action='store_true', help='Start marker pattern (Regular Expression)')
+        argprsr.add_argument('-E', '--null-end-pattern',   action='store_true', help='Start marker pattern (Regular Expression)')
 
         argprsr.add_argument('-m', '--multi-match',  action='store_true',  help='Can be match mulitple regions')
         argprsr.add_argument('-H', '--class-help',   action='store_true',  help='Show class help')
@@ -378,7 +379,7 @@ class EmbeddedText(object):
         argprsr.add_argument('-r', '--keep-head-el', action='store_false', default=True, dest='skip_head_emptyline', help='Keep empty lines at head')
         argprsr.add_argument('-R', '--keep-tail-el', action='store_false', default=True, dest='skip_tail_emptyline', help='Keep empty lines at tail')
         argprsr.add_argument('-u', '--unquote',  action='store_true',  help='Remove triple-quote')
-        argprsr.add_argument('-E', '--encoding', default='utf-8',  help='Remove triple-quote')
+        argprsr.add_argument('-C', '--encoding', default='utf-8',  help='Remove triple-quote')
         argprsr.add_argument('-i', '--input-file',  help='Input file path (Default: show to standar output)')
         argprsr.add_argument('-o', '--output-file', help='Output file path (Default: show to standar output)')
         argprsr.add_argument('-a', '--append-output', help='Append to output file (meaning less without -o, --output)')
@@ -390,8 +391,10 @@ class EmbeddedText(object):
         args = argprsr.parse_args()
         run_mode = 'code' if args.code_mode else 'text'
 
-        s_regex = args.start_pattern if args.start_pattern else pattern_default[run_mode]['start']
-        e_regex = args.end_pattern   if args.end_pattern   else pattern_default[run_mode]['end']
+        s_regex = (None if (args.start_pattern is None or args.null_start_pattern) 
+                   else (args.start_pattern if args.start_pattern else pattern_default[run_mode]['start']))
+        e_regex = (None if (args.end_pattern is None   or args.null_end_pattern)
+                   else (args.end_pattern   if args.end_pattern   else pattern_default[run_mode]['end']))
 
         s_pttrn = re.compile(s_regex, re.I if args.ignore_case else 0)
         e_pttrn = re.compile(e_regex, re.I if args.ignore_case else 0)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "embedded-text"
-version = "0.0.2"
+version = "0.0.3"
 description = "Tool for extracting embedded text data in python script."
 dependencies = []
 readme = "README.rst"

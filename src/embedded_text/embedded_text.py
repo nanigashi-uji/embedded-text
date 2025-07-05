@@ -10,7 +10,7 @@ class EmbeddedText(object):
     EmbeddedText: Utility to extract text contents embedded in file
     """
 
-    VERSION     = "0.0.1"
+    VERSION     = "0.0.2"
     HEADSPACE   = re.compile(r'^(?P<indent>\s*).*')
     EMPTYLINE   = re.compile(r'^\s*$')
     TRIPLEQUATE = re.compile(r"^\s*(?P<triplequote>'{3}|\"{3})(?P<rest>.*)$")
@@ -92,7 +92,9 @@ class EmbeddedText(object):
                                        encoding=self.encoding, open_mode=open_mode)
 
     @classmethod
-    def extract_raw_to_file(cls, outfile, infile:str=None, s_marker:str=None, e_marker:str=None,
+    def extract_raw_to_file(cls, outfile, 
+                            infile:str=inspect.getsourcefile(inspect.currentframe()),
+                            s_marker:str=None, e_marker:str=None,
                             include_markers:bool=True, multi_match:bool=False,
                             dedent:bool=False, format_filter=None, 
                             open_mode='w', encoding:str='utf-8'):
@@ -107,7 +109,9 @@ class EmbeddedText(object):
             fout.close()
 
     @classmethod
-    def extract_raw_from_file(cls, infile:str=None, s_marker:str=None, e_marker:str=None,
+    def extract_raw_from_file(cls,
+                              infile:str=inspect.getsourcefile(inspect.currentframe()),
+                              s_marker:str=None, e_marker:str=None,
                               include_markers:bool=True, multi_match:bool=False,
                               dedent:bool=False, format_filter=None,
                               encoding:str='utf-8') -> typing.Iterator[str]:
@@ -163,7 +167,9 @@ class EmbeddedText(object):
                     yield format_filter(line) if callable(format_filter) else line
 
     @classmethod
-    def extract_unquote_to_file(cls, outfile, infile:str=None, s_marker:str=None, e_marker:str=None,
+    def extract_unquote_to_file(cls, outfile,
+                                infile:str=inspect.getsourcefile(inspect.currentframe()),
+                                s_marker:str=None, e_marker:str=None,
                                 include_markers:bool=True, multi_match:bool=False,
                                 dedent:bool=False, unquote:bool=False,
                                 format_filter=None, open_mode='w', encoding:str='utf-8'):
@@ -178,7 +184,9 @@ class EmbeddedText(object):
             fout.close()
 
     @classmethod
-    def extract_unquote_from_file(cls, infile:str=None, s_marker:str=None, e_marker:str=None,
+    def extract_unquote_from_file(cls,
+                                  infile:str=inspect.getsourcefile(inspect.currentframe()),
+                                  s_marker:str=None, e_marker:str=None,
                                   include_markers:bool=True, multi_match:bool=False,
                                   dedent:bool=False, unquote:bool=True, format_filter=None,
                                   encoding:str='utf-8') -> typing.Iterator[str]:
@@ -300,7 +308,9 @@ class EmbeddedText(object):
             el_buf = []
 
     @classmethod
-    def extract_from_file(cls, infile:str=None, s_marker:str=None, e_marker:str=None,
+    def extract_from_file(cls,
+                          infile:str=inspect.getsourcefile(inspect.currentframe()),
+                          s_marker:str=None, e_marker:str=None,
                           include_markers:bool=True, multi_match:bool=False,
                           dedent:bool=False, skip_head_emptyline:bool=False,
                           skip_tail_emptyline:bool=False, unquote:bool=False,
@@ -321,7 +331,9 @@ class EmbeddedText(object):
                 yield line
 
     @classmethod
-    def extract_to_file(cls, outfile, infile:str=None, s_marker:str=None, e_marker:str=None,
+    def extract_to_file(cls, outfile,
+                        infile:str=inspect.getsourcefile(inspect.currentframe()),
+                        s_marker:str=None, e_marker:str=None,
                         include_markers:bool=True, multi_match:bool=False,
                         dedent:bool=False, skip_head_emptyline:bool=False,
                         skip_tail_emptyline:bool=False, unquote:bool=False,
@@ -405,13 +417,14 @@ class EmbeddedText(object):
                                          cls.VERSION))
             return
 
+        in_path = args.input_file if args.input_file else inspect.getsourcefile(inspect.currentframe())
+
         if args.output_file:
-            extractor.dump(output_path=args.output_file, input_path=args.input_file, 
+            extractor.dump(output_path=args.output_file, input_path=in_path,
                            open_mode=('x' if args.exclusive_output else ('a' if args.append_output else 'w')))
         else:
-            for line in extractor.lines(input_path=args.input_file):
+            for line in extractor.lines(input_path=in_path):
                 sys.stdout.write(line)
-
 
 def main():
     return EmbeddedText.main()
